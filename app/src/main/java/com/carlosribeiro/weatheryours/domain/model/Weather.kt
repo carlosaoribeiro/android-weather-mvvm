@@ -1,4 +1,5 @@
 package com.carlosribeiro.weatheryours.domain.model
 
-class Weather {
-}
+data class Weather(
+    val temperature: String
+)
