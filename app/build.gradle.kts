@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.carlosribeiro.weatheryours"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.carlosribeiro.weatheryours"
