@@ -5,3 +5,4 @@ data class HourlyForecastUiModel(
     val temperatureText: String,
     val description: String
 )
+

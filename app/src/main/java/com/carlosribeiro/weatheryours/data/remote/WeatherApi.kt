@@ -21,4 +21,13 @@ interface WeatherApi {
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String
     ): ForecastResponseDto
+
+    @GET("weather")
+    suspend fun getWeatherByLocation(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("units") units: String = "metric",
+        @Query("appid") apiKey: String
+    ): WeatherResponseDto
+
 }
