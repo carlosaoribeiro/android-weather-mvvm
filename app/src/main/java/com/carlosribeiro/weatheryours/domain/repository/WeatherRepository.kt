@@ -5,12 +5,15 @@ import com.carlosribeiro.weatheryours.domain.model.Weather
 
 interface WeatherRepository {
 
-    // 🌤 Clima atual
     suspend fun getWeather(
         city: String
     ): Weather
 
-    // ⏰ Forecast por hora
+    suspend fun getWeatherByLocation(
+        lat: Double,
+        lon: Double
+    ): Weather
+
     suspend fun getHourlyForecast(
         lat: Double,
         lon: Double

@@ -10,9 +10,30 @@ class WeatherRepositoryImpl(
     private val api: WeatherApi
 ) : WeatherRepository {
 
+
     override suspend fun getWeather(city: String): Weather {
         val response = api.getWeather(
             city = city,
+            apiKey = BuildConfig.WEATHER_API_KEY
+        )
+
+        return Weather(
+            city = response.name,
+            temperature = response.main.temp,
+            description = response.weather.firstOrNull()?.description.orEmpty(),
+            lat = response.coord.lat,
+            lon = response.coord.lon
+        )
+    }
+
+    override suspend fun getWeatherByLocation(
+        lat: Double,
+        lon: Double
+    ): Weather {
+
+        val response = api.getWeatherByLocation(
+            lat = lat,
+            lon = lon,
             apiKey = BuildConfig.WEATHER_API_KEY
         )
 
