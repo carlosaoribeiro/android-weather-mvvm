@@ -1,9 +1,8 @@
 package com.carlosribeiro.weatheryours.domain.model
 
-data class Weather(
-    val city: String,
+data class HourlyForecast(
+    val timestamp: Long,
     val temperature: Double,
     val description: String,
-    val lat: Double,
-    val lon: Double
+    val hour: String
 )
