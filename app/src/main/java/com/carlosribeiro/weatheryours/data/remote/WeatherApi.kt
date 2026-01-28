@@ -1,5 +1,6 @@
 package com.carlosribeiro.weatheryours.data.remote
 
+import com.carlosribeiro.weatheryours.data.remote.dto.AirQualityResponseDto
 import com.carlosribeiro.weatheryours.data.remote.dto.ForecastResponseDto
 import com.carlosribeiro.weatheryours.data.remote.dto.WeatherResponseDto
 import retrofit2.http.GET
@@ -29,5 +30,12 @@ interface WeatherApi {
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String
     ): WeatherResponseDto
+
+    @GET("air_pollution")
+    suspend fun getAirQuality(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("appid") apiKey: String
+    ): AirQualityResponseDto
 
 }
