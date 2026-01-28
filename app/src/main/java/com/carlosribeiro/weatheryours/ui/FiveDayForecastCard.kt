@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
 
 @Composable
@@ -23,37 +23,56 @@ fun FiveDayForecastCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            // HEADER
             Text(
                 text = "5-DAY FORECAST",
                 color = Color.White.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelMedium
             )
 
-            items.forEach { day ->
+            // 🔹 DIVIDER
+            Divider(
+                color = Color.White.copy(alpha = 0.15f),
+                thickness = 1.dp
+            )
+
+            // ROWS
+            items.forEachIndexed { index, day ->
                 ForecastRow(day)
+
+                if (index < items.lastIndex) {
+                    Divider(
+                        color = Color.White.copy(alpha = 0.08f),
+                        thickness = 0.5.dp
+                    )
+                }
             }
         }
     }
 }
 
+
 @Composable
 private fun ForecastRow(model: DailyForecastUiModel) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        // Day
         Text(
             text = model.day,
             color = Color.White,
-            modifier = Modifier.width(48.dp)
+            modifier = Modifier.width(56.dp)
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Placeholder do ícone (depois vira Image/Icon)
+        // Icon (placeholder)
         Text(
             text = "☀️",
             modifier = Modifier.width(32.dp)
@@ -61,29 +80,36 @@ private fun ForecastRow(model: DailyForecastUiModel) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Text(
-            text = model.minTemp,
-            color = Color.White.copy(alpha = 0.7f)
-        )
+        // MIN
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = "MIN",
+                fontSize = 10.sp,
+                color = Color.White.copy(alpha = 0.6f)
+            )
+            Text(
+                text = model.minTemp,
+                color = Color.White.copy(alpha = 0.75f)
+            )
+        }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
-            text = model.maxTemp,
-            color = Color.White
-        )
+        // MAX
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = "MAX",
+                fontSize = 10.sp,
+                color = Color.White.copy(alpha = 0.6f)
+            )
+            Text(
+                text = model.maxTemp,
+                color = Color.White
+            )
+        }
     }
-}
-@Preview(showBackground = true)
-@Composable
-fun FiveDayForecastCardPreview() {
-    FiveDayForecastCard(
-        items = listOf(
-            DailyForecastUiModel("Today", "sunny", "-1°", "13°"),
-            DailyForecastUiModel("Thu", "cloudy", "1°", "18°"),
-            DailyForecastUiModel("Fri", "cloudy", "2°", "11°"),
-            DailyForecastUiModel("Sat", "sunny", "-1°", "8°"),
-            DailyForecastUiModel("Sun", "sunny", "-4°", "12°")
-        )
-    )
 }

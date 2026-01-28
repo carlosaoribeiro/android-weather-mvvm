@@ -21,24 +21,38 @@ fun WeatherMetricsCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(88.dp)
             .background(
                 color = Color.White.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(18.dp)
             )
-            .padding(vertical = 16.dp, horizontal = 12.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        MetricBox {
             MetricItem(value = humidityText, label = "Humidity")
         }
 
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        MetricBox {
             MetricItem(value = windSpeedText, label = "Wind")
         }
 
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        MetricBox {
             MetricItem(value = rainChanceText, label = "Rain")
         }
+    }
+}
+
+@Composable
+private fun RowScope.MetricBox(
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier.weight(1f),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
     }
 }
 
@@ -48,7 +62,8 @@ private fun MetricItem(
     label: String
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = value,

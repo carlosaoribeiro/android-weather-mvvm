@@ -25,7 +25,8 @@ fun AirQualityCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
 
             Text(
@@ -35,12 +36,12 @@ fun AirQualityCard(
                 fontWeight = FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = model.index.toString(),
                 color = Color.White,
-                fontSize = 42.sp,
+                fontSize = 40.sp,
                 fontWeight = FontWeight.Bold
             )
 
@@ -51,7 +52,7 @@ fun AirQualityCard(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = model.description,
