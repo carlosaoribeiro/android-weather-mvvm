@@ -1,9 +1,9 @@
 package com.carlosribeiro.weatheryours.presentation
 
-import WeatherUiState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carlosribeiro.weatheryours.domain.usecase.GetAirQualityUseCase
+import com.carlosribeiro.weatheryours.domain.usecase.GetDailyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetHourlyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetWeatherUseCase
 import com.carlosribeiro.weatheryours.presentation.mapper.toUi
@@ -11,10 +11,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+// ✅ IMPORT CORRETO
+import com.carlosribeiro.weatheryours.presentation.WeatherUiState
+
 class WeatherViewModel(
     private val getWeatherUseCase: GetWeatherUseCase,
     private val getHourlyForecastUseCase: GetHourlyForecastUseCase,
-    private val getAirQualityUseCase: GetAirQualityUseCase
+    private val getAirQualityUseCase: GetAirQualityUseCase,
+    private val getDailyForecastUseCase: GetDailyForecastUseCase
 ) : ViewModel() {
 
     private val _uiState =
@@ -47,11 +51,15 @@ class WeatherViewModel(
                 val weather = getWeatherUseCaseByLocation(lat, lon)
                 val hourly = getHourlyForecastUseCase(lat, lon)
                 val airQuality = getAirQualityUseCase(lat, lon)
+                val daily = getDailyForecastUseCase(lat, lon)
+
+                val now = System.currentTimeMillis() / 1000
 
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
                     hourlyForecast = hourly.map { it.toUi() },
-                    airQuality = airQuality.toUi()
+                    airQuality = airQuality.toUi(),
+                    dailyForecast = daily.map { it.toUi(now) }
                 )
             } catch (e: Exception) {
                 _uiState.value = WeatherUiState.Error(
@@ -88,7 +96,8 @@ class WeatherViewModel(
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
                     hourlyForecast = emptyList(),
-                    airQuality = airQuality.toUi()
+                    airQuality = airQuality.toUi(),
+                    dailyForecast = emptyList() // ✅ obrigatório
                 )
             } catch (e: Exception) {
                 _uiState.value =

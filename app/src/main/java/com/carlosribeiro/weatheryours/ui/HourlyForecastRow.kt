@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -25,15 +24,16 @@ fun HourlyForecastItem(
     uiModel: HourlyForecastUiModel
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(80.dp)               // largura fixa (4 itens)
-            .height(96.dp)              // altura fixa
+            .width(80.dp)
+            .height(96.dp)
             .background(
                 color = Color.White.copy(alpha = 0.15f),
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(8.dp)
+            .padding(horizontal = 8.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = uiModel.hour,
@@ -41,24 +41,20 @@ fun HourlyForecastItem(
             fontSize = 12.sp
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = uiModel.temperatureText,
             color = Color.White,
             fontSize = 14.sp
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = uiModel.description,
             color = Color.White.copy(alpha = 0.8f),
             fontSize = 10.sp,
-            maxLines = 2,                    // ✅ ATÉ 2 LINHAS
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            lineHeight = 12.sp               // ✅ melhora leitura
+            lineHeight = 12.sp
         )
     }
 }
@@ -68,8 +64,7 @@ fun HourlyForecastRow(
     items: List<HourlyForecastUiModel>
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(top = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items.forEach { item ->
             HourlyForecastItem(uiModel = item)
@@ -87,26 +82,10 @@ fun HourlyForecastRow(
 fun HourlyForecastRowPreview() {
 
     val previewItems = listOf(
-        HourlyForecastUiModel(
-            hour = "6 AM",
-            temperatureText = "0°",
-            description = "overcast clouds"
-        ),
-        HourlyForecastUiModel(
-            hour = "9 AM",
-            temperatureText = "8°",
-            description = "scattered clouds"
-        ),
-        HourlyForecastUiModel(
-            hour = "12 PM",
-            temperatureText = "3°",
-            description = "light rain"
-        ),
-        HourlyForecastUiModel(
-            hour = "3 PM",
-            temperatureText = "0°",
-            description = "clear sky"
-        )
+        HourlyForecastUiModel("6 AM", "0°", "overcast clouds"),
+        HourlyForecastUiModel("9 AM", "8°", "scattered clouds"),
+        HourlyForecastUiModel("12 PM", "3°", "light rain"),
+        HourlyForecastUiModel("3 PM", "0°", "clear sky")
     )
 
     HourlyForecastRow(items = previewItems)
