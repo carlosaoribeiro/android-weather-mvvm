@@ -1,9 +1,10 @@
 package com.carlosribeiro.weatheryours.data.repository
 
-import com.carlosribeiro.weatheryours.data.remote.dto.WeatherDto
 import com.carlosribeiro.weatheryours.BuildConfig
+import com.carlosribeiro.weatheryours.data.mapper.toDomain
 import com.carlosribeiro.weatheryours.data.remote.WeatherApi
 import com.carlosribeiro.weatheryours.data.remote.dto.WeatherResponseDto
+import com.carlosribeiro.weatheryours.domain.model.AirQuality
 import com.carlosribeiro.weatheryours.domain.model.HourlyForecast
 import com.carlosribeiro.weatheryours.domain.model.Weather
 import com.carlosribeiro.weatheryours.domain.repository.WeatherRepository
@@ -64,6 +65,22 @@ class WeatherRepositoryImpl(
         }
     }
 
+    override suspend fun getAirQuality(
+        lat: Double,
+        lon: Double
+    ): AirQuality {
+        val response = api.getAirQuality(
+            lat = lat,
+            lon = lon,
+            apiKey = BuildConfig.WEATHER_API_KEY
+        )
+
+        val item = response.list.firstOrNull()
+            ?: error("Air quality data not available")
+
+        return item.toDomain()
+    }
+
     private fun WeatherResponseDto.toDomainWeather(): Weather {
         return Weather(
             city = name,
@@ -73,8 +90,7 @@ class WeatherRepositoryImpl(
             lon = coord.lon,
             humidity = main.humidity,
             windSpeed = wind.speed,
-            rainChance = clouds.all // proxy visual (%)
+            rainChance = clouds.all
         )
     }
 }
-

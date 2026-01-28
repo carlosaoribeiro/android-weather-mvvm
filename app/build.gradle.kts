@@ -88,6 +88,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 
 
 

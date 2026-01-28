@@ -1,5 +1,6 @@
 package com.carlosribeiro.weatheryours.domain.repository
 
+import com.carlosribeiro.weatheryours.domain.model.AirQuality
 import com.carlosribeiro.weatheryours.domain.model.HourlyForecast
 import com.carlosribeiro.weatheryours.domain.model.Weather
 
@@ -28,4 +29,12 @@ interface WeatherRepository {
         lat: Double,
         lon: Double
     ): List<HourlyForecast>
+
+    /**
+     * Qualidade do ar por coordenadas (AQI)
+     */
+    suspend fun getAirQuality(
+        lat: Double,
+        lon: Double
+    ): AirQuality
 }

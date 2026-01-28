@@ -5,12 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carlosribeiro.weatheryours.data.location.LocationProvider
 import com.carlosribeiro.weatheryours.data.remote.ApiFactory
 import com.carlosribeiro.weatheryours.data.repository.WeatherRepositoryImpl
+import com.carlosribeiro.weatheryours.domain.usecase.GetAirQualityUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetHourlyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetWeatherUseCase
 import com.carlosribeiro.weatheryours.presentation.WeatherViewModel
@@ -45,10 +45,12 @@ class MainActivity : ComponentActivity() {
 
         val getWeatherUseCase = GetWeatherUseCase(repository)
         val getHourlyForecastUseCase = GetHourlyForecastUseCase(repository)
+        val getAirQualityUseCase = GetAirQualityUseCase(repository) // 🔥 FALTAVA
 
         val factory = WeatherViewModelFactory(
             getWeatherUseCase = getWeatherUseCase,
-            getHourlyForecastUseCase = getHourlyForecastUseCase
+            getHourlyForecastUseCase = getHourlyForecastUseCase,
+            getAirQualityUseCase = getAirQualityUseCase // 🔥 OBRIGATÓRIO
         )
 
         viewModel = ViewModelProvider(
@@ -57,12 +59,12 @@ class MainActivity : ComponentActivity() {
         )[WeatherViewModel::class.java]
 
         setContent {
-            val state = viewModel.uiState.collectAsStateWithLifecycle().value
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-
+            val state = viewModel.uiState.collectAsStateWithLifecycle(
+                initialValue = WeatherUiState.Loading
+            )
 
             WeatherScreen(
-                state = state,
+                state = state.value, // ✅ CORRETO
                 onRequestLocationPermission = {
                     locationPermissionLauncher.launch(
                         Manifest.permission.ACCESS_FINE_LOCATION

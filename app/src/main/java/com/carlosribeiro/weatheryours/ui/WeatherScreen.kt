@@ -1,5 +1,6 @@
 package com.carlosribeiro.weatheryours.ui
 
+import WeatherUiState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.safeDrawing
-import com.carlosribeiro.weatheryours.presentation.WeatherUiState
+import com.carlosribeiro.weatheryours.ui.model.AirQualityUiModel
 import com.carlosribeiro.weatheryours.ui.model.HourlyForecastUiModel
 import com.carlosribeiro.weatheryours.ui.model.WeatherUiModel
 import com.carlosribeiro.weatheryours.ui.theme.WeatherGradients
@@ -131,6 +132,13 @@ fun WeatherScreen(
                         )
                     }
 
+                    // 🟣 NOVO CARD — AIR QUALITY
+                    item {
+                        AirQualityCard(
+                            model = state.airQuality
+                        )
+                    }
+
                     item {
                         HourlyForecastRow(
                             items = state.hourlyForecast
@@ -162,6 +170,11 @@ fun WeatherScreenSuccessPreview() {
                 HourlyForecastUiModel("11 AM", "23°", "Sunny"),
                 HourlyForecastUiModel("12 PM", "24°", "Cloudy"),
                 HourlyForecastUiModel("1 PM", "25°", "Cloudy")
+            ),
+            airQuality = AirQualityUiModel(
+                index = 71,
+                level = "Moderate",
+                description = "Air quality index is 71, similar to yesterday at about this time."
             )
         )
     )
