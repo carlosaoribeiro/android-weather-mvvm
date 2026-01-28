@@ -23,28 +23,16 @@ class WeatherViewModel(
         onAppStart()
     }
 
-    /**
-     * App abriu → decidir fluxo inicial
-     */
+    /* ---------------- App lifecycle ---------------- */
+
     private fun onAppStart() {
-        // Por enquanto sempre pedimos permissão
         _uiState.value = WeatherUiState.RequestLocationPermission
     }
 
-    /**
-     * Permissão concedida pela Activity
-     */
+    /* ---------------- Location flow ---------------- */
+
     fun onLocationPermissionGranted() {
         _uiState.value = WeatherUiState.FetchingLocation
-
-        // ⚠️ Próxima etapa:
-        // aqui vamos buscar a localização real
-        // por enquanto vamos simular com Berlin
-        loadWeather(
-            city = "Berlin",
-            lat = 52.52,
-            lon = 13.41
-        )
     }
 
     fun onLocationFetched(
@@ -53,10 +41,8 @@ class WeatherViewModel(
     ) {
         viewModelScope.launch {
             try {
-                // Aqui você pode trocar depois para reverse geocode
-                val cityFallback = "Current Location"
-
-                val weather = getWeatherUseCase(cityFallback)
+                // ✅ CORRETO: localização → localização
+                val weather = getWeatherUseCaseByLocation(lat, lon)
                 val hourly = getHourlyForecastUseCase(lat, lon)
 
                 _uiState.value = WeatherUiState.Success(
@@ -71,42 +57,54 @@ class WeatherViewModel(
         }
     }
 
-
-    /**
-     * Permissão negada
-     */
     fun onLocationPermissionDenied() {
         _uiState.value = WeatherUiState.LocationDenied
     }
 
-    /**
-     * Usuário clicou em "Usar minha localização" novamente
-     */
     fun onUseMyLocationClicked() {
         _uiState.value = WeatherUiState.RequestLocationPermission
     }
 
-    /**
-     * Fluxo existente (não quebramos nada)
-     */
-    fun loadWeather(
-        city: String,
-        lat: Double,
-        lon: Double
-    ) {
+    /* ---------------- Manual search ---------------- */
+
+    fun onSearchByCityClicked() {
+        _uiState.value = WeatherUiState.SearchByCity
+    }
+
+    fun loadWeatherByCity(city: String) {
         viewModelScope.launch {
             try {
+                // ✅ CORRETO: cidade digitada → city endpoint
                 val weather = getWeatherUseCase(city)
-                val hourly = getHourlyForecastUseCase(lat, lon)
 
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
-                    hourlyForecast = hourly.map { it.toUi() }
+                    hourlyForecast = emptyList()
                 )
             } catch (e: Exception) {
                 _uiState.value =
-                    WeatherUiState.Error(e.message ?: "Erro desconhecido")
+                    WeatherUiState.Error(e.message ?: "Erro ao buscar cidade")
             }
         }
     }
+
+    /* ---------------- Internal helpers ---------------- */
+
+    /**
+     * 🔒 Garantia absoluta:
+     * localização NUNCA passa por getWeather(city)
+     */
+    private suspend fun getWeatherUseCaseByLocation(
+        lat: Double,
+        lon: Double
+    ) = getWeatherUseCaseByLocationInternal(lat, lon)
+
+    /**
+     * Esse método só existe para deixar explícito o contrato.
+     * Ele DEVE chamar o repository por localização.
+     */
+    private suspend fun getWeatherUseCaseByLocationInternal(
+        lat: Double,
+        lon: Double
+    ) = getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
 }

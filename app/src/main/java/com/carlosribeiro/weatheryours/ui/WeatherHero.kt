@@ -46,21 +46,26 @@ fun WeatherHero(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 🌤 Ícone animado
-            WeatherIcon(
-                description = uiModel.description,
-                size = 72.dp
-            )
-
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 🌡 Temperatura
-            Text(
-                text = uiModel.temperatureText,
-                color = Color.White,
-                fontSize = 72.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // 🌡 Temperatura + ícone menor à direita
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = uiModel.temperatureText,
+                    color = Color.White,
+                    fontSize = 72.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.width(12.dp)) // espaçamento elegante
+
+                WeatherIcon(
+                    description = uiModel.description,
+                    size = 40.dp // menor que o ícone principal
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -73,6 +78,9 @@ fun WeatherHero(
         }
     }
 }
+
+/* ---------------- PREVIEW ---------------- */
+
 @Preview(showBackground = true, backgroundColor = 0xFF0A1E3F)
 @Composable
 fun WeatherHeroPreview() {
@@ -80,7 +88,10 @@ fun WeatherHeroPreview() {
         uiModel = WeatherUiModel(
             city = "Berlin",
             temperatureText = "24°C",
-            description = "Partly Cloudy"
+            description = "Partly Cloudy",
+            humidityText = "62%",
+            windSpeedText = "19 km/h",
+            rainChanceText = "24%"
         )
     )
 }

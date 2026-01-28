@@ -5,8 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.collectAsState
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carlosribeiro.weatheryours.data.location.LocationProvider
 import com.carlosribeiro.weatheryours.data.remote.ApiFactory
 import com.carlosribeiro.weatheryours.data.repository.WeatherRepositoryImpl
@@ -21,9 +22,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var viewModel: WeatherViewModel
     private lateinit var locationProvider: LocationProvider
 
-    // 🔐 Launcher explained:
-    // - Android cuida da permissão
-    // - Activity decide o fluxo
     private val locationPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -33,17 +31,15 @@ class MainActivity : ComponentActivity() {
                 fetchLocation()
             } else {
                 viewModel.onLocationPermissionDenied()
-                finish() // requisito definido: se negar, fecha o app
+                finish()
             }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 📍 Location provider
         locationProvider = LocationProvider(this)
 
-        // 🔌 Infra básica (sem DI ainda)
         val api = ApiFactory.createWeatherApi()
         val repository = WeatherRepositoryImpl(api)
 
@@ -61,7 +57,9 @@ class MainActivity : ComponentActivity() {
         )[WeatherViewModel::class.java]
 
         setContent {
-            val state = viewModel.uiState.collectAsState().value
+            val state = viewModel.uiState.collectAsStateWithLifecycle().value
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+
 
             WeatherScreen(
                 state = state,
@@ -74,14 +72,17 @@ class MainActivity : ComponentActivity() {
                     locationPermissionLauncher.launch(
                         Manifest.permission.ACCESS_FINE_LOCATION
                     )
+                },
+                onSearchByCityClicked = {
+                    viewModel.onSearchByCityClicked()
+                },
+                onSearchByCity = { city ->
+                    viewModel.loadWeatherByCity(city)
                 }
             )
         }
     }
 
-    /**
-     * 📡 Busca a localização real do usuário
-     */
     private fun fetchLocation() {
         locationProvider.getLastKnownLocation(
             onSuccess = { lat, lon ->

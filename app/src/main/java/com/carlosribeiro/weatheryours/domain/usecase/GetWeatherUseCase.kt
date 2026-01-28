@@ -4,7 +4,7 @@ import com.carlosribeiro.weatheryours.domain.model.Weather
 import com.carlosribeiro.weatheryours.domain.repository.WeatherRepository
 
 class GetWeatherUseCase(
-    private val repository: WeatherRepository
+    internal val repository: WeatherRepository
 ) {
     suspend operator fun invoke(city: String): Weather {
         return repository.getWeather(city)

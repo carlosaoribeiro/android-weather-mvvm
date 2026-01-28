@@ -2,6 +2,7 @@ package com.carlosribeiro.weatheryours.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -10,6 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.safeDrawing
 import com.carlosribeiro.weatheryours.presentation.WeatherUiState
 import com.carlosribeiro.weatheryours.ui.model.HourlyForecastUiModel
 import com.carlosribeiro.weatheryours.ui.model.WeatherUiModel
@@ -35,6 +39,7 @@ fun WeatherScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(background)
+            .padding(WindowInsets.safeDrawing.asPaddingValues())
             .padding(24.dp)
     ) {
         when (state) {
@@ -74,11 +79,8 @@ fun WeatherScreen(
                 }
             }
 
-            // 📍 Busca por cidade
             WeatherUiState.SearchByCity -> {
-                SearchCityContent(
-                    onSearch = onSearchByCity
-                )
+                SearchCityContent(onSearch = onSearchByCity)
             }
 
             WeatherUiState.LocationDenied -> {
@@ -96,9 +98,7 @@ fun WeatherScreen(
                         Text("Tentar novamente")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    TextButton(
-                        onClick = { /* ViewModel muda para SearchByCity */ }
-                    ) {
+                    TextButton(onClick = onSearchByCityClicked) {
                         Text("Buscar por cidade", color = Color.White)
                     }
                 }
@@ -114,27 +114,35 @@ fun WeatherScreen(
             }
 
             is WeatherUiState.Success -> {
-                Column(
-                    modifier = Modifier.fillMaxSize()
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = false,
+                    verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
-                    WeatherHero(uiModel = state.weather)
+                    item {
+                        WeatherHero(uiModel = state.weather)
+                    }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    item {
+                        WeatherMetricsCard(
+                            humidityText = state.weather.humidityText,
+                            windSpeedText = state.weather.windSpeedText,
+                            rainChanceText = state.weather.rainChanceText
+                        )
+                    }
 
-                    WeatherMetricsCard()
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    HourlyForecastRow(
-                        items = state.hourlyForecast
-                    )
+                    item {
+                        HourlyForecastRow(
+                            items = state.hourlyForecast
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/* ---------------- PREVIEWS ---------------- */
+/* ---------------- PREVIEW ---------------- */
 
 @Preview(showBackground = true)
 @Composable
@@ -144,7 +152,10 @@ fun WeatherScreenSuccessPreview() {
             weather = WeatherUiModel(
                 city = "Berlin",
                 temperatureText = "24°C",
-                description = "Partly Cloudy"
+                description = "Partly Cloudy",
+                humidityText = "62%",
+                windSpeedText = "19 km/h",
+                rainChanceText = "24%"
             ),
             hourlyForecast = listOf(
                 HourlyForecastUiModel("10 AM", "22°", "Sunny"),
@@ -154,34 +165,4 @@ fun WeatherScreenSuccessPreview() {
             )
         )
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenLoadingPreview() {
-    WeatherScreen(state = WeatherUiState.Loading)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenRequestPermissionPreview() {
-    WeatherScreen(state = WeatherUiState.RequestLocationPermission)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenFetchingLocationPreview() {
-    WeatherScreen(state = WeatherUiState.FetchingLocation)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenLocationDeniedPreview() {
-    WeatherScreen(state = WeatherUiState.LocationDenied)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenSearchByCityPreview() {
-    WeatherScreen(state = WeatherUiState.SearchByCity)
 }
