@@ -3,7 +3,8 @@ package com.carlosribeiro.weatheryours.data.mapper
 import com.carlosribeiro.weatheryours.data.remote.dto.ForecastItemDto
 import com.carlosribeiro.weatheryours.domain.model.HourlyForecast
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 fun ForecastItemDto.toDomain(): HourlyForecast {
     val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -13,6 +14,6 @@ fun ForecastItemDto.toDomain(): HourlyForecast {
         timestamp = dt,
         temperature = main.temp,
         description = weather.firstOrNull()?.description.orEmpty(),
-        hour = hourFormatted
+        hour = hourFormatted          // ✅ AGORA SIM
     )
 }

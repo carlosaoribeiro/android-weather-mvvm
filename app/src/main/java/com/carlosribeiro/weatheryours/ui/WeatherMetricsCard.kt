@@ -8,32 +8,44 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun WeatherMetricsCard() {
+fun WeatherMetricsCard(
+    humidityText: String,
+    windSpeedText: String,
+    rainChanceText: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0x22000000),
-                shape = RoundedCornerShape(16.dp)
+                color = Color.White.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(18.dp)
             )
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 16.dp, horizontal = 12.dp)
     ) {
 
-        MetricItem(label = "Humidity", value = "62%")
-        MetricItem(label = "Wind", value = "19 km/h")
-        MetricItem(label = "Rain", value = "24%")
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            MetricItem(value = humidityText, label = "Humidity")
+        }
+
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            MetricItem(value = windSpeedText, label = "Wind")
+        }
+
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            MetricItem(value = rainChanceText, label = "Rain")
+        }
     }
 }
 
 @Composable
 private fun MetricItem(
-    label: String,
-    value: String
+    value: String,
+    label: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -41,13 +53,17 @@ private fun MetricItem(
         Text(
             text = value,
             color = Color.White,
-            fontSize = 16.sp
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = label,
-            color = Color.White.copy(alpha = 0.7f),
+            color = Color.White.copy(alpha = 0.65f),
             fontSize = 12.sp
         )
     }
 }
+
