@@ -11,10 +11,15 @@ import com.carlosribeiro.weatheryours.data.location.LocationProvider
 import com.carlosribeiro.weatheryours.data.remote.ApiFactory
 import com.carlosribeiro.weatheryours.data.repository.WeatherRepositoryImpl
 import com.carlosribeiro.weatheryours.domain.usecase.GetAirQualityUseCase
+import com.carlosribeiro.weatheryours.domain.usecase.GetDailyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetHourlyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetWeatherUseCase
 import com.carlosribeiro.weatheryours.presentation.WeatherViewModel
 import com.carlosribeiro.weatheryours.presentation.WeatherViewModelFactory
+import com.carlosribeiro.weatheryours.presentation.WeatherUiState
+
+
+
 import com.carlosribeiro.weatheryours.ui.WeatherScreen
 
 class MainActivity : ComponentActivity() {
@@ -31,7 +36,6 @@ class MainActivity : ComponentActivity() {
                 fetchLocation()
             } else {
                 viewModel.onLocationPermissionDenied()
-                finish()
             }
         }
 
@@ -40,17 +44,22 @@ class MainActivity : ComponentActivity() {
 
         locationProvider = LocationProvider(this)
 
+        // 🔗 API + Repository
         val api = ApiFactory.createWeatherApi()
         val repository = WeatherRepositoryImpl(api)
 
+        // 🔗 UseCases
         val getWeatherUseCase = GetWeatherUseCase(repository)
         val getHourlyForecastUseCase = GetHourlyForecastUseCase(repository)
-        val getAirQualityUseCase = GetAirQualityUseCase(repository) // 🔥 FALTAVA
+        val getAirQualityUseCase = GetAirQualityUseCase(repository)
+        val getDailyForecastUseCase = GetDailyForecastUseCase(repository) // ✅ NOVO
 
+        // 🔗 Factory
         val factory = WeatherViewModelFactory(
             getWeatherUseCase = getWeatherUseCase,
             getHourlyForecastUseCase = getHourlyForecastUseCase,
-            getAirQualityUseCase = getAirQualityUseCase // 🔥 OBRIGATÓRIO
+            getAirQualityUseCase = getAirQualityUseCase,
+            getDailyForecastUseCase = getDailyForecastUseCase // ✅ NOVO
         )
 
         viewModel = ViewModelProvider(
@@ -64,7 +73,7 @@ class MainActivity : ComponentActivity() {
             )
 
             WeatherScreen(
-                state = state.value, // ✅ CORRETO
+                state = state.value,
                 onRequestLocationPermission = {
                     locationPermissionLauncher.launch(
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -92,7 +101,6 @@ class MainActivity : ComponentActivity() {
             },
             onError = {
                 viewModel.onLocationPermissionDenied()
-                finish()
             }
         )
     }

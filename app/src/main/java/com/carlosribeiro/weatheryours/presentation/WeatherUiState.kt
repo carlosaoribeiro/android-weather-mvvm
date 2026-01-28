@@ -1,6 +1,9 @@
+package com.carlosribeiro.weatheryours.presentation
+
 import com.carlosribeiro.weatheryours.ui.model.AirQualityUiModel
 import com.carlosribeiro.weatheryours.ui.model.HourlyForecastUiModel
 import com.carlosribeiro.weatheryours.ui.model.WeatherUiModel
+import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
 
 sealed interface WeatherUiState {
 
@@ -13,7 +16,8 @@ sealed interface WeatherUiState {
     data class Success(
         val weather: WeatherUiModel,
         val hourlyForecast: List<HourlyForecastUiModel>,
-        val airQuality: AirQualityUiModel // 👈 NOVO
+        val airQuality: AirQualityUiModel,
+        val dailyForecast: List<DailyForecastUiModel> // ✅ NOVO
     ) : WeatherUiState
 
     data class Error(

@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.collections.firstOrNull
+import com.carlosribeiro.weatheryours.data.mapper.toDailyForecast
+import com.carlosribeiro.weatheryours.domain.model.DailyForecast
+
 
 class WeatherRepositoryImpl(
     private val api: WeatherApi
@@ -81,6 +84,18 @@ class WeatherRepositoryImpl(
         return item.toDomain()
     }
 
+    override suspend fun getDailyForecast(
+        lat: Double,
+        lon: Double
+    ): List <DailyForecast> {
+        val response = api.getForecast(
+            lat = lat,
+            lon = lon,
+            apiKey = BuildConfig.WEATHER_API_KEY
+        )
+
+        return response.toDailyForecast()
+    }
     private fun WeatherResponseDto.toDomainWeather(): Weather {
         return Weather(
             city = name,
