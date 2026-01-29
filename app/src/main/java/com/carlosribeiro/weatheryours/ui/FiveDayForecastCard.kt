@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
@@ -24,17 +25,18 @@ fun FiveDayForecastCard(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             // HEADER
             Text(
                 text = "5-DAY FORECAST",
                 color = Color.White.copy(alpha = 0.7f),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium
             )
 
-            // 🔹 DIVIDER
+            // DIVIDER (header)
             Divider(
                 color = Color.White.copy(alpha = 0.15f),
                 thickness = 1.dp
@@ -55,13 +57,12 @@ fun FiveDayForecastCard(
     }
 }
 
-
 @Composable
 private fun ForecastRow(model: DailyForecastUiModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(36.dp),
+            .height(40.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -69,10 +70,11 @@ private fun ForecastRow(model: DailyForecastUiModel) {
         Text(
             text = model.day,
             color = Color.White,
-            modifier = Modifier.width(56.dp)
+            modifier = Modifier.width(56.dp),
+            fontWeight = FontWeight.Medium
         )
 
-        // Icon (placeholder)
+        // Icon (placeholder – pronto pra trocar por Image/Icon)
         Text(
             text = "☀️",
             modifier = Modifier.width(32.dp)
@@ -87,15 +89,17 @@ private fun ForecastRow(model: DailyForecastUiModel) {
             Text(
                 text = "MIN",
                 fontSize = 10.sp,
-                color = Color.White.copy(alpha = 0.6f)
+                color = Color.White.copy(alpha = 0.6f),
+                letterSpacing = 0.6.sp
             )
             Text(
                 text = model.minTemp,
-                color = Color.White.copy(alpha = 0.75f)
+                color = Color.White.copy(alpha = 0.75f),
+                fontWeight = FontWeight.Medium
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
 
         // MAX
         Column(
@@ -104,11 +108,13 @@ private fun ForecastRow(model: DailyForecastUiModel) {
             Text(
                 text = "MAX",
                 fontSize = 10.sp,
-                color = Color.White.copy(alpha = 0.6f)
+                color = Color.White.copy(alpha = 0.6f),
+                letterSpacing = 0.6.sp
             )
             Text(
                 text = model.maxTemp,
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
