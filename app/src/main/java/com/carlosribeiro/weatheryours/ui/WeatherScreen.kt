@@ -9,16 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.safeDrawing
 import com.carlosribeiro.weatheryours.presentation.WeatherUiState
-import com.carlosribeiro.weatheryours.ui.model.AirQualityUiModel
-import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
-import com.carlosribeiro.weatheryours.ui.model.HourlyForecastUiModel
-import com.carlosribeiro.weatheryours.ui.model.WeatherUiModel
 import com.carlosribeiro.weatheryours.ui.theme.WeatherGradients
 import com.carlosribeiro.weatheryours.ui.theme.gradientFor
 
@@ -31,8 +26,10 @@ fun WeatherScreen(
     onUseMyLocationClicked: () -> Unit = {}
 ) {
     val background = when (state) {
-        is WeatherUiState.Success -> gradientFor(state.weather.description)
-        else -> WeatherGradients.Default
+        is WeatherUiState.Success ->
+            gradientFor(state.weather.description)
+        else ->
+            WeatherGradients.Default
     }
 
     Box(
@@ -40,7 +37,7 @@ fun WeatherScreen(
             .fillMaxSize()
             .background(background)
             .padding(WindowInsets.safeDrawing.asPaddingValues())
-            .padding(vertical = 24.dp) // ⬅️ só vertical aqui
+            .padding(24.dp)
     ) {
         when (state) {
 
@@ -49,24 +46,33 @@ fun WeatherScreen(
             }
 
             WeatherUiState.RequestLocationPermission -> {
-                CenteredMessage {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "Precisamos da sua localização para mostrar o clima automaticamente.",
+                        text = "We need your location to show the weather automatically.",
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = onRequestLocationPermission) {
-                        Text("Permitir localização")
+                        Text("Allow location")
                     }
                 }
             }
 
             WeatherUiState.FetchingLocation -> {
-                CenteredMessage {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     CircularProgressIndicator(color = Color.White)
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Obtendo sua localização...", color = Color.White)
+                    Text(
+                        text = "Getting your location...",
+                        color = Color.White
+                    )
                 }
             }
 
@@ -75,26 +81,35 @@ fun WeatherScreen(
             }
 
             WeatherUiState.LocationDenied -> {
-                CenteredMessage {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "Sem localização não conseguimos mostrar o clima automaticamente.",
+                        text = "Without location access we can’t show the weather automatically.",
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = onUseMyLocationClicked) {
-                        Text("Tentar novamente")
+                        Text("Try again")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     TextButton(onClick = onSearchByCityClicked) {
-                        Text("Buscar por cidade", color = Color.White)
+                        Text("Search by city", color = Color.White)
                     }
                 }
             }
 
             is WeatherUiState.Error -> {
+                val message = when (state) {
+                    is WeatherUiState.Error.Network -> state.message
+                    is WeatherUiState.Error.CityNotFound -> state.message
+                    is WeatherUiState.Error.Generic -> state.message
+                }
+
                 Text(
-                    text = state.message,
+                    text = message,
                     color = Color.White,
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
@@ -105,13 +120,12 @@ fun WeatherScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 48.dp
-                    )
+                    contentPadding = PaddingValues(bottom = 48.dp)
                 ) {
-                    item { WeatherHero(uiModel = state.weather) }
+
+                    item {
+                        WeatherHero(uiModel = state.weather)
+                    }
 
                     item {
                         WeatherMetricsCard(
@@ -121,61 +135,29 @@ fun WeatherScreen(
                         )
                     }
 
-                    item { AirQualityCard(model = state.airQuality) }
+                    if (state.hasHourlyForecast) {
+                        item {
+                            HourlyForecastRow(
+                                items = state.hourlyForecast
+                            )
+                        }
+                    }
 
-                    item { HourlyForecastRow(items = state.hourlyForecast) }
+                    if (state.hasDailyForecast) {
+                        item {
+                            FiveDayForecastCard(
+                                items = state.dailyForecast
+                            )
+                        }
+                    }
 
-                    item { FiveDayForecastCard(items = state.dailyForecast) }
+                    item {
+                        AirQualityCard(
+                            model = state.airQuality
+                        )
+                    }
                 }
             }
         }
     }
-}
-
-/* ---------------- PREVIEW ---------------- */
-
-@Preview(showBackground = true)
-@Composable
-fun WeatherScreenSuccessPreview() {
-    WeatherScreen(
-        state = WeatherUiState.Success(
-            weather = WeatherUiModel(
-                city = "Berlin",
-                temperatureText = "24°C",
-                description = "Partly Cloudy",
-                humidityText = "62%",
-                windSpeedText = "19 km/h",
-                rainChanceText = "24%"
-            ),
-            hourlyForecast = listOf(
-                HourlyForecastUiModel("10 AM", "22°", "Sunny"),
-                HourlyForecastUiModel("11 AM", "23°", "Sunny"),
-                HourlyForecastUiModel("12 PM", "24°", "Cloudy"),
-                HourlyForecastUiModel("1 PM", "25°", "Cloudy")
-            ),
-            airQuality = AirQualityUiModel(
-                index = 71,
-                level = "Moderate",
-                description = "Air quality index is 71, similar to yesterday at about this time."
-            ),
-            dailyForecast = listOf(
-                DailyForecastUiModel("Today", "sunny", "-1°", "13°"),
-                DailyForecastUiModel("Thu", "cloudy", "1°", "18°"),
-                DailyForecastUiModel("Fri", "cloudy", "2°", "11°"),
-                DailyForecastUiModel("Sat", "sunny", "-1°", "8°"),
-                DailyForecastUiModel("Sun", "sunny", "-4°", "12°")
-            )
-        )
-    )
-}
-@Composable
-private fun CenteredMessage(
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        content = content
-    )
 }

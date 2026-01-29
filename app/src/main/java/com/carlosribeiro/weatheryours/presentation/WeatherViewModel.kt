@@ -10,9 +10,7 @@ import com.carlosribeiro.weatheryours.presentation.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-// ✅ IMPORT CORRETO
-import com.carlosribeiro.weatheryours.presentation.WeatherUiState
+import java.io.IOException
 
 class WeatherViewModel(
     private val getWeatherUseCase: GetWeatherUseCase,
@@ -48,7 +46,7 @@ class WeatherViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val weather = getWeatherUseCaseByLocation(lat, lon)
+                val weather = getWeatherByLocation(lat, lon)
                 val hourly = getHourlyForecastUseCase(lat, lon)
                 val airQuality = getAirQualityUseCase(lat, lon)
                 val daily = getDailyForecastUseCase(lat, lon)
@@ -58,13 +56,11 @@ class WeatherViewModel(
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
                     hourlyForecast = hourly.map { it.toUi() },
-                    airQuality = airQuality.toUi(),
-                    dailyForecast = daily.map { it.toUi(now) }
+                    dailyForecast = daily.map { it.toUi(now) },
+                    airQuality = airQuality.toUi()
                 )
             } catch (e: Exception) {
-                _uiState.value = WeatherUiState.Error(
-                    e.message ?: "Erro ao carregar clima"
-                )
+                _uiState.value = mapError(e)
             }
         }
     }
@@ -88,23 +84,48 @@ class WeatherViewModel(
             try {
                 val weather = getWeatherUseCase(city)
 
+                val hourly = getHourlyForecastUseCase(
+                    lat = weather.lat,
+                    lon = weather.lon
+                )
+
+                val daily = getDailyForecastUseCase(
+                    lat = weather.lat,
+                    lon = weather.lon
+                )
+
                 val airQuality = getAirQualityUseCase(
                     lat = weather.lat,
                     lon = weather.lon
                 )
 
+                val now = System.currentTimeMillis() / 1000
+
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
-                    hourlyForecast = emptyList(),
-                    airQuality = airQuality.toUi(),
-                    dailyForecast = emptyList() // ✅ obrigatório
+                    hourlyForecast = hourly.map { it.toUi() },
+                    dailyForecast = daily.map { it.toUi(now) },
+                    airQuality = airQuality.toUi()
                 )
             } catch (e: Exception) {
-                _uiState.value =
-                    WeatherUiState.Error(e.message ?: "Erro ao buscar cidade")
+                _uiState.value = mapError(e)
             }
         }
     }
+
+    /* ---------------- Error mapping ---------------- */
+
+    private fun mapError(e: Exception): WeatherUiState.Error =
+        when (e) {
+            is IOException ->
+                WeatherUiState.Error.Network()
+
+            is IllegalArgumentException ->
+                WeatherUiState.Error.CityNotFound()
+
+            else ->
+                WeatherUiState.Error.Generic()
+        }
 
     /* ---------------- Internal helpers ---------------- */
 
@@ -112,7 +133,7 @@ class WeatherViewModel(
      * 🔒 Garantia absoluta:
      * localização NUNCA passa por getWeather(city)
      */
-    private suspend fun getWeatherUseCaseByLocation(
+    private suspend fun getWeatherByLocation(
         lat: Double,
         lon: Double
     ) = getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
