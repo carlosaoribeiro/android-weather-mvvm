@@ -11,9 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// ✅ IMPORT CORRETO
-import com.carlosribeiro.weatheryours.presentation.WeatherUiState
-
 class WeatherViewModel(
     private val getWeatherUseCase: GetWeatherUseCase,
     private val getHourlyForecastUseCase: GetHourlyForecastUseCase,
@@ -21,63 +18,46 @@ class WeatherViewModel(
     private val getDailyForecastUseCase: GetDailyForecastUseCase
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
-
+    private val _uiState = MutableStateFlow<WeatherUiState>(
+        WeatherUiState.RequestLocationPermission
+    )
     val uiState: StateFlow<WeatherUiState> = _uiState
 
-    init {
-        onAppStart()
-    }
-
-    /* ---------------- App lifecycle ---------------- */
-
-    private fun onAppStart() {
-        _uiState.value = WeatherUiState.RequestLocationPermission
-    }
-
-    /* ---------------- Location flow ---------------- */
+    /* ---------- LOCATION FLOW ---------- */
 
     fun onLocationPermissionGranted() {
         _uiState.value = WeatherUiState.FetchingLocation
-    }
-
-    fun onLocationFetched(
-        lat: Double,
-        lon: Double
-    ) {
-        viewModelScope.launch {
-            try {
-                val weather = getWeatherUseCaseByLocation(lat, lon)
-                val hourly = getHourlyForecastUseCase(lat, lon)
-                val airQuality = getAirQualityUseCase(lat, lon)
-                val daily = getDailyForecastUseCase(lat, lon)
-
-                val now = System.currentTimeMillis() / 1000
-
-                _uiState.value = WeatherUiState.Success(
-                    weather = weather.toUi(),
-                    hourlyForecast = hourly.map { it.toUi() },
-                    airQuality = airQuality.toUi(),
-                    dailyForecast = daily.map { it.toUi(now) }
-                )
-            } catch (e: Exception) {
-                _uiState.value = WeatherUiState.Error(
-                    e.message ?: "Erro ao carregar clima"
-                )
-            }
-        }
     }
 
     fun onLocationPermissionDenied() {
         _uiState.value = WeatherUiState.LocationDenied
     }
 
-    fun onUseMyLocationClicked() {
-        _uiState.value = WeatherUiState.RequestLocationPermission
+    fun onLocationFetched(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            try {
+                val weather = getWeatherUseCase.getByLocation(lat, lon)
+                val hourly = getHourlyForecastUseCase(lat, lon)
+                val daily = getDailyForecastUseCase(lat, lon)
+                val airQuality = getAirQualityUseCase(lat, lon)
+
+                val now = System.currentTimeMillis() / 1000
+
+                _uiState.value = WeatherUiState.Success(
+                    weather = weather.toUi(),
+                    hourlyForecast = hourly.map { it.toUi() },
+                    dailyForecast = daily.map { it.toUi(now) },
+                    airQuality = airQuality.toUi()
+                )
+            } catch (e: Exception) {
+                _uiState.value = WeatherUiState.Error(
+                    e.message ?: "Generic error"
+                )
+            }
+        }
     }
 
-    /* ---------------- Manual search ---------------- */
+    /* ---------- SEARCH FLOW ---------- */
 
     fun onSearchByCityClicked() {
         _uiState.value = WeatherUiState.SearchByCity
@@ -88,32 +68,34 @@ class WeatherViewModel(
             try {
                 val weather = getWeatherUseCase(city)
 
-                val airQuality = getAirQualityUseCase(
-                    lat = weather.lat,
-                    lon = weather.lon
+                val hourly = getHourlyForecastUseCase(
+                    weather.lat,
+                    weather.lon
                 )
+
+                val daily = getDailyForecastUseCase(
+                    weather.lat,
+                    weather.lon
+                )
+
+                val airQuality = getAirQualityUseCase(
+                    weather.lat,
+                    weather.lon
+                )
+
+                val now = System.currentTimeMillis() / 1000
 
                 _uiState.value = WeatherUiState.Success(
                     weather = weather.toUi(),
-                    hourlyForecast = emptyList(),
-                    airQuality = airQuality.toUi(),
-                    dailyForecast = emptyList() // ✅ obrigatório
+                    hourlyForecast = hourly.map { it.toUi() },
+                    dailyForecast = daily.map { it.toUi(now) },
+                    airQuality = airQuality.toUi()
                 )
             } catch (e: Exception) {
-                _uiState.value =
-                    WeatherUiState.Error(e.message ?: "Erro ao buscar cidade")
+                _uiState.value = WeatherUiState.Error(
+                    e.message ?: "Generic error"
+                )
             }
         }
     }
-
-    /* ---------------- Internal helpers ---------------- */
-
-    /**
-     * 🔒 Garantia absoluta:
-     * localização NUNCA passa por getWeather(city)
-     */
-    private suspend fun getWeatherUseCaseByLocation(
-        lat: Double,
-        lon: Double
-    ) = getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
 }

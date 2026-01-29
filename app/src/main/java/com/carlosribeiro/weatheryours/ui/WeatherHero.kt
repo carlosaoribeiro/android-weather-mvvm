@@ -4,16 +4,20 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.WeatherUiModel
+import com.carlosribeiro.weatheryours.R
+
 
 @Composable
 fun WeatherHero(
@@ -39,9 +43,9 @@ fun WeatherHero(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Today",
+                text = stringResource(R.string.today),
                 color = Color.White.copy(alpha = 0.7f),
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodySmall
             )
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -10,6 +10,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
+import androidx.compose.ui.res.stringResource
+import com.carlosribeiro.weatheryours.R
+
 
 @Composable
 fun FiveDayForecastCard(
@@ -29,11 +32,10 @@ fun FiveDayForecastCard(
 
             // HEADER
             Text(
-                text = "5-DAY FORECAST",
+                text = stringResource(R.string.five_day_forecast),
                 color = Color.White.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelMedium
             )
-
             // 🔹 DIVIDER
             Divider(
                 color = Color.White.copy(alpha = 0.15f),

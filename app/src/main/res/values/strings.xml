@@ -1,4 +1,65 @@
 <resources>
+
+    <!-- App -->
     <string name="app_name">WeatherYours</string>
+
+    <!-- Location permission -->
+    <string name="permission_location_title">
+        We need your location to show the weather automatically.
+    </string>
+    <string name="welcome_title" translatable="false">Welcome to WeatherYours</string>
+
+    <string name="permission_location_button">
+        Allow location
+    </string>
+
+    <!-- Location states -->
+    <string name="fetching_location">
+        Getting your location…
+    </string>
+    <string name="location_denied">
+        Without location access we can’t show the weather automatically.
+    </string>
+    <string name="try_again">
+        Try again
+    </string>
+
+    <!-- Search -->
+    <string name="search_by_city">
+        Search by city
+    </string>
+
+    <!-- Metrics -->
+    <string name="humidity">Humidity</string>
+    <string name="wind">Wind</string>
+    <string name="rain">Rain</string>
+
+    <!-- Forecast -->
+    <string name="five_day_forecast">5-Day Forecast</string>
+    <string name="today">Today</string>
+    <string name="min">MIN</string>
+    <string name="max">MAX</string>
+
+    <!-- Air quality -->
+    <string name="air_quality">Air Quality</string>
+    <string name="air_quality_good">Good</string>
+    <string name="air_quality_fair">Fair</string>
+    <string name="air_quality_moderate">Moderate</string>
+    <string name="air_quality_poor">Poor</string>
+    <string name="air_quality_very_poor">Very poor</string>
+    <string name="air_quality_description">
+        Air quality index is %1$d, similar to yesterday at about this time.
+    </string>
+
+    <!-- Errors -->
+    <string name="error_network">
+        Unable to connect. Check your internet connection.
+    </string>
+    <string name="error_city_not_found">
+        City not found. Try another name.
+    </string>
+    <string name="error_generic">
+        Something went wrong. Please try again.
+    </string>
 
 </resources>

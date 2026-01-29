@@ -6,8 +6,7 @@ import com.carlosribeiro.weatheryours.ui.model.AirQualityUiModel
 fun AirQuality.toUi(): AirQualityUiModel {
     return AirQualityUiModel(
         index = index,
-        level = level.name.lowercase()
-            .replaceFirstChar { it.uppercase() },
-        description = "Air quality index is $index, similar to yesterday at about this time."
+        level = level.name, // FAIR, GOOD, POOR
+        descriptionCode = "AQI_DESCRIPTION"
     )
 }
