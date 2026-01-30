@@ -10,6 +10,7 @@ import com.carlosribeiro.weatheryours.presentation.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 class WeatherViewModel(
     private val getWeatherUseCase: GetWeatherUseCase,
@@ -18,28 +19,37 @@ class WeatherViewModel(
     private val getDailyForecastUseCase: GetDailyForecastUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<WeatherUiState>(
-        WeatherUiState.RequestLocationPermission
-    )
+    private val _uiState =
+        MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
+
     val uiState: StateFlow<WeatherUiState> = _uiState
 
-    /* ---------- LOCATION FLOW ---------- */
+    init {
+        onAppStart()
+    }
+
+    /* ---------------- App lifecycle ---------------- */
+
+    private fun onAppStart() {
+        _uiState.value = WeatherUiState.RequestLocationPermission
+    }
+
+    /* ---------------- Location flow ---------------- */
 
     fun onLocationPermissionGranted() {
         _uiState.value = WeatherUiState.FetchingLocation
     }
 
-    fun onLocationPermissionDenied() {
-        _uiState.value = WeatherUiState.LocationDenied
-    }
-
-    fun onLocationFetched(lat: Double, lon: Double) {
+    fun onLocationFetched(
+        lat: Double,
+        lon: Double
+    ) {
         viewModelScope.launch {
             try {
-                val weather = getWeatherUseCase.getByLocation(lat, lon)
+                val weather = getWeatherByLocation(lat, lon)
                 val hourly = getHourlyForecastUseCase(lat, lon)
-                val daily = getDailyForecastUseCase(lat, lon)
                 val airQuality = getAirQualityUseCase(lat, lon)
+                val daily = getDailyForecastUseCase(lat, lon)
 
                 val now = System.currentTimeMillis() / 1000
 
@@ -50,14 +60,20 @@ class WeatherViewModel(
                     airQuality = airQuality.toUi()
                 )
             } catch (e: Exception) {
-                _uiState.value = WeatherUiState.Error(
-                    e.message ?: "Generic error"
-                )
+                _uiState.value = mapError(e)
             }
         }
     }
 
-    /* ---------- SEARCH FLOW ---------- */
+    fun onLocationPermissionDenied() {
+        _uiState.value = WeatherUiState.LocationDenied
+    }
+
+    fun onUseMyLocationClicked() {
+        _uiState.value = WeatherUiState.RequestLocationPermission
+    }
+
+    /* ---------------- Manual search ---------------- */
 
     fun onSearchByCityClicked() {
         _uiState.value = WeatherUiState.SearchByCity
@@ -69,18 +85,18 @@ class WeatherViewModel(
                 val weather = getWeatherUseCase(city)
 
                 val hourly = getHourlyForecastUseCase(
-                    weather.lat,
-                    weather.lon
+                    lat = weather.lat,
+                    lon = weather.lon
                 )
 
                 val daily = getDailyForecastUseCase(
-                    weather.lat,
-                    weather.lon
+                    lat = weather.lat,
+                    lon = weather.lon
                 )
 
                 val airQuality = getAirQualityUseCase(
-                    weather.lat,
-                    weather.lon
+                    lat = weather.lat,
+                    lon = weather.lon
                 )
 
                 val now = System.currentTimeMillis() / 1000
@@ -92,10 +108,33 @@ class WeatherViewModel(
                     airQuality = airQuality.toUi()
                 )
             } catch (e: Exception) {
-                _uiState.value = WeatherUiState.Error(
-                    e.message ?: "Generic error"
-                )
+                _uiState.value = mapError(e)
             }
         }
     }
+
+    /* ---------------- Error mapping ---------------- */
+
+    private fun mapError(e: Exception): WeatherUiState.Error =
+        when (e) {
+            is IOException ->
+                WeatherUiState.Error.Network()
+
+            is IllegalArgumentException ->
+                WeatherUiState.Error.CityNotFound()
+
+            else ->
+                WeatherUiState.Error.Generic()
+        }
+
+    /* ---------------- Internal helpers ---------------- */
+
+    /**
+     * 🔒 Garantia absoluta:
+     * localização NUNCA passa por getWeather(city)
+     */
+    private suspend fun getWeatherByLocation(
+        lat: Double,
+        lon: Double
+    ) = getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
 }
