@@ -8,9 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.carlosribeiro.weatheryours.R
 
 @Composable
 fun WeatherMetricsCard(
@@ -21,29 +23,40 @@ fun WeatherMetricsCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(88.dp)
             .background(
                 color = Color.White.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(18.dp)
             )
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 16.dp, horizontal = 12.dp)
     ) {
 
         MetricBox {
-            MetricItem(value = humidityText, label = "Humidity")
+            MetricItem(
+                value = humidityText,
+                label = stringResource(R.string.humidity)
+            )
         }
 
         MetricBox {
-            MetricItem(value = windSpeedText, label = "Wind")
+            MetricItem(
+                value = windSpeedText,
+                label = stringResource(R.string.wind)
+            )
         }
 
         MetricBox {
-            MetricItem(value = rainChanceText, label = "Rain")
+            MetricItem(
+                value = rainChanceText,
+                label = stringResource(R.string.rain)
+            )
         }
     }
 }
 
+/**
+ * ⚠️ IMPORTANTE:
+ * weight só funciona porque agora estamos no RowScope
+ */
 @Composable
 private fun RowScope.MetricBox(
     content: @Composable () -> Unit
@@ -61,19 +74,14 @@ private fun MetricItem(
     value: String,
     label: String
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold
         )
-
         Spacer(modifier = Modifier.height(6.dp))
-
         Text(
             text = label,
             color = Color.White.copy(alpha = 0.65f),
@@ -81,4 +89,3 @@ private fun MetricItem(
         )
     }
 }
-

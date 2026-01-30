@@ -11,6 +11,7 @@ interface WeatherApi {
     @GET("weather")
     suspend fun getWeather(
         @Query("q") city: String,
+        @Query("lang") lang: String,              // 👈 ADICIONADO
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String
     ): WeatherResponseDto
@@ -19,6 +20,7 @@ interface WeatherApi {
     suspend fun getForecast(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
+        @Query("lang") lang: String,              // 👈 ADICIONADO
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String
     ): ForecastResponseDto
@@ -27,6 +29,7 @@ interface WeatherApi {
     suspend fun getWeatherByLocation(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
+        @Query("lang") lang: String,              // 👈 ADICIONADO
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String
     ): WeatherResponseDto
@@ -37,5 +40,4 @@ interface WeatherApi {
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String
     ): AirQualityResponseDto
-
 }

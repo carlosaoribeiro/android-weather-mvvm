@@ -1,0 +1,64 @@
+<resources>
+
+    <!-- App -->
+    <string name="app_name">WeatherYours</string>
+
+    <!-- Location permission -->
+    <string name="permission_location_title">
+        Precisamos da sua localização para mostrar o clima automaticamente.
+    </string>
+    <string name="permission_location_button">
+        Permitir localização
+    </string>
+    <string name="welcome_title">Bem-vindo ao WeatherYours</string>
+
+    <!-- Location states -->
+    <string name="fetching_location">
+        Obtendo sua localização…
+    </string>
+    <string name="location_denied">
+        Sem acesso à localização não conseguimos mostrar o clima automaticamente.
+    </string>
+    <string name="try_again">
+        Tentar novamente
+    </string>
+
+    <!-- Search -->
+    <string name="search_by_city">
+        Buscar por cidade
+    </string>
+
+    <!-- Metrics -->
+    <string name="humidity">Umidade</string>
+    <string name="wind">Vento</string>
+    <string name="rain">Chuva</string>
+
+    <!-- Forecast -->
+    <string name="five_day_forecast">Previsão de 5 dias</string>
+    <string name="today">Hoje</string>
+    <string name="min">MÍN</string>
+    <string name="max">MÁX</string>
+
+    <!-- Air quality -->
+    <string name="air_quality">Qualidade do ar</string>
+    <string name="air_quality_good">Bom</string>
+    <string name="air_quality_fair">Razoável</string>
+    <string name="air_quality_moderate">Moderada</string>
+    <string name="air_quality_poor">Ruim</string>
+    <string name="air_quality_very_poor">Muito ruim</string>
+    <string name="air_quality_description">
+        O índice de qualidade do ar é %1$d, semelhante ao de ontem neste horário.
+    </string>
+
+    <!-- Errors -->
+    <string name="error_network">
+        Não foi possível conectar. Verifique sua internet.
+    </string>
+    <string name="error_city_not_found">
+        Cidade não encontrada. Tente outro nome.
+    </string>
+    <string name="error_generic">
+        Algo deu errado. Tente novamente.
+    </string>
+
+</resources>

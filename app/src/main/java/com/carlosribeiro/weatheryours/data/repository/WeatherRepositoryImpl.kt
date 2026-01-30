@@ -2,19 +2,17 @@ package com.carlosribeiro.weatheryours.data.repository
 
 import com.carlosribeiro.weatheryours.BuildConfig
 import com.carlosribeiro.weatheryours.data.mapper.toDomain
+import com.carlosribeiro.weatheryours.data.mapper.toDailyForecast
 import com.carlosribeiro.weatheryours.data.remote.WeatherApi
 import com.carlosribeiro.weatheryours.data.remote.dto.WeatherResponseDto
 import com.carlosribeiro.weatheryours.domain.model.AirQuality
+import com.carlosribeiro.weatheryours.domain.model.DailyForecast
 import com.carlosribeiro.weatheryours.domain.model.HourlyForecast
 import com.carlosribeiro.weatheryours.domain.model.Weather
 import com.carlosribeiro.weatheryours.domain.repository.WeatherRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.firstOrNull
-import com.carlosribeiro.weatheryours.data.mapper.toDailyForecast
-import com.carlosribeiro.weatheryours.domain.model.DailyForecast
-
 
 class WeatherRepositoryImpl(
     private val api: WeatherApi
@@ -27,6 +25,8 @@ class WeatherRepositoryImpl(
 
         val response = api.getWeather(
             city = city,
+            lang = getApiLanguage(),
+            units = "metric",
             apiKey = BuildConfig.WEATHER_API_KEY
         )
 
@@ -40,6 +40,8 @@ class WeatherRepositoryImpl(
         val response = api.getWeatherByLocation(
             lat = lat,
             lon = lon,
+            lang = getApiLanguage(),
+            units = "metric",
             apiKey = BuildConfig.WEATHER_API_KEY
         )
 
@@ -53,6 +55,8 @@ class WeatherRepositoryImpl(
         val response = api.getForecast(
             lat = lat,
             lon = lon,
+            lang = getApiLanguage(),
+            units = "metric",
             apiKey = BuildConfig.WEATHER_API_KEY
         )
 
@@ -87,15 +91,28 @@ class WeatherRepositoryImpl(
     override suspend fun getDailyForecast(
         lat: Double,
         lon: Double
-    ): List <DailyForecast> {
+    ): List<DailyForecast> {
         val response = api.getForecast(
             lat = lat,
             lon = lon,
+            lang = getApiLanguage(),
+            units = "metric",
             apiKey = BuildConfig.WEATHER_API_KEY
         )
 
         return response.toDailyForecast()
     }
+
+    /* ---------------- Helpers ---------------- */
+
+    private fun getApiLanguage(): String {
+        return when (Locale.getDefault().language) {
+            "pt" -> "pt_br"
+            "es" -> "es"
+            else -> "en"
+        }
+    }
+
     private fun WeatherResponseDto.toDomainWeather(): Weather {
         return Weather(
             city = name,
