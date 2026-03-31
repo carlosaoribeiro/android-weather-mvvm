@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carlosribeiro.weatheryours.data.location.LocationProvider
@@ -14,13 +15,11 @@ import com.carlosribeiro.weatheryours.domain.usecase.GetAirQualityUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetDailyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetHourlyForecastUseCase
 import com.carlosribeiro.weatheryours.domain.usecase.GetWeatherUseCase
+import com.carlosribeiro.weatheryours.presentation.WeatherUiState
 import com.carlosribeiro.weatheryours.presentation.WeatherViewModel
 import com.carlosribeiro.weatheryours.presentation.WeatherViewModelFactory
-import com.carlosribeiro.weatheryours.presentation.WeatherUiState
-
-
-
 import com.carlosribeiro.weatheryours.ui.WeatherScreen
+import com.carlosribeiro.weatheryours.ui.theme.WeatherYoursTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -44,64 +43,47 @@ class MainActivity : ComponentActivity() {
 
         locationProvider = LocationProvider(this)
 
-        // 🔗 API + Repository
-        val api = ApiFactory.createWeatherApi()
+        val api        = ApiFactory.createWeatherApi()
         val repository = WeatherRepositoryImpl(api)
 
-        // 🔗 UseCases
-        val getWeatherUseCase = GetWeatherUseCase(repository)
-        val getHourlyForecastUseCase = GetHourlyForecastUseCase(repository)
-        val getAirQualityUseCase = GetAirQualityUseCase(repository)
-        val getDailyForecastUseCase = GetDailyForecastUseCase(repository) // ✅ NOVO
-
-        // 🔗 Factory
         val factory = WeatherViewModelFactory(
-            getWeatherUseCase = getWeatherUseCase,
-            getHourlyForecastUseCase = getHourlyForecastUseCase,
-            getAirQualityUseCase = getAirQualityUseCase,
-            getDailyForecastUseCase = getDailyForecastUseCase // ✅ NOVO
+            getWeatherUseCase        = GetWeatherUseCase(repository),
+            getHourlyForecastUseCase = GetHourlyForecastUseCase(repository),
+            getAirQualityUseCase     = GetAirQualityUseCase(repository),
+            getDailyForecastUseCase  = GetDailyForecastUseCase(repository)
         )
 
-        viewModel = ViewModelProvider(
-            this,
-            factory
-        )[WeatherViewModel::class.java]
+        viewModel = ViewModelProvider(this, factory)[WeatherViewModel::class.java]
 
         setContent {
-            val state = viewModel.uiState.collectAsStateWithLifecycle(
-                initialValue = WeatherUiState.Loading
-            )
+            WeatherYoursTheme {
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle(
+                    initialValue = WeatherUiState.Loading
+                )
 
-            WeatherScreen(
-                state = state.value,
-                onRequestLocationPermission = {
-                    locationPermissionLauncher.launch(
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                },
-                onUseMyLocationClicked = {
-                    locationPermissionLauncher.launch(
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                },
-                onSearchByCityClicked = {
-                    viewModel.onSearchByCityClicked()
-                },
-                onSearchByCity = { city ->
-                    viewModel.loadWeatherByCity(city)
-                }
-            )
+                WeatherScreen(
+                    uiState                     = uiState,
+                    // Lupa na tela principal → abre busca
+                    onSearchClick               = { viewModel.onSearchByCityClicked() },
+                    // CLOSE / seta voltar na tela de busca → volta ao estado anterior
+                    onCloseSearch               = { viewModel.onCloseSearch() },
+                    // Campo de busca → busca pelo nome digitado
+                    onSearchByCity              = { city -> viewModel.loadWeatherByCity(city) },
+                    // Telas de permissão/erro → solicita permissão
+                    onRequestLocationPermission = {
+                        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    }
+                )
+            }
         }
+
+        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private fun fetchLocation() {
         locationProvider.getLastKnownLocation(
-            onSuccess = { lat, lon ->
-                viewModel.onLocationFetched(lat, lon)
-            },
-            onError = {
-                viewModel.onLocationPermissionDenied()
-            }
+            onSuccess = { lat, lon -> viewModel.onLocationFetched(lat, lon) },
+            onError   = { viewModel.onLocationPermissionDenied() }
         )
     }
 }

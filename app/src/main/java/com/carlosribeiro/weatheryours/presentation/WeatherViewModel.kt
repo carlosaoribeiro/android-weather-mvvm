@@ -19,10 +19,11 @@ class WeatherViewModel(
     private val getDailyForecastUseCase: GetDailyForecastUseCase
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
-
+    private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     val uiState: StateFlow<WeatherUiState> = _uiState
+
+    // Guarda o último Success para restaurar ao fechar a busca
+    private var lastSuccessState: WeatherUiState.Success? = null
 
     init {
         onAppStart()
@@ -40,25 +41,23 @@ class WeatherViewModel(
         _uiState.value = WeatherUiState.FetchingLocation
     }
 
-    fun onLocationFetched(
-        lat: Double,
-        lon: Double
-    ) {
+    fun onLocationFetched(lat: Double, lon: Double) {
         viewModelScope.launch {
             try {
-                val weather = getWeatherByLocation(lat, lon)
-                val hourly = getHourlyForecastUseCase(lat, lon)
+                val weather    = getWeatherByLocation(lat, lon)
+                val hourly     = getHourlyForecastUseCase(lat, lon)
                 val airQuality = getAirQualityUseCase(lat, lon)
-                val daily = getDailyForecastUseCase(lat, lon)
+                val daily      = getDailyForecastUseCase(lat, lon)
+                val now        = System.currentTimeMillis() / 1000
 
-                val now = System.currentTimeMillis() / 1000
-
-                _uiState.value = WeatherUiState.Success(
-                    weather = weather.toUi(),
+                val success = WeatherUiState.Success(
+                    weather        = weather.toUi(),
                     hourlyForecast = hourly.map { it.toUi() },
-                    dailyForecast = daily.map { it.toUi(now) },
-                    airQuality = airQuality.toUi()
+                    dailyForecast  = daily.map { it.toUi(now) },
+                    airQuality     = airQuality.toUi()
                 )
+                lastSuccessState = success
+                _uiState.value   = success
             } catch (e: Exception) {
                 _uiState.value = mapError(e)
             }
@@ -79,34 +78,32 @@ class WeatherViewModel(
         _uiState.value = WeatherUiState.SearchByCity
     }
 
+    /**
+     * Fecha a busca:
+     * - Se já tinha um Success anterior → volta para ele
+     * - Caso contrário → volta para RequestLocationPermission
+     */
+    fun onCloseSearch() {
+        _uiState.value = lastSuccessState ?: WeatherUiState.RequestLocationPermission
+    }
+
     fun loadWeatherByCity(city: String) {
         viewModelScope.launch {
             try {
-                val weather = getWeatherUseCase(city)
+                val weather    = getWeatherUseCase(city)
+                val hourly     = getHourlyForecastUseCase(lat = weather.lat, lon = weather.lon)
+                val daily      = getDailyForecastUseCase(lat = weather.lat, lon = weather.lon)
+                val airQuality = getAirQualityUseCase(lat = weather.lat, lon = weather.lon)
+                val now        = System.currentTimeMillis() / 1000
 
-                val hourly = getHourlyForecastUseCase(
-                    lat = weather.lat,
-                    lon = weather.lon
-                )
-
-                val daily = getDailyForecastUseCase(
-                    lat = weather.lat,
-                    lon = weather.lon
-                )
-
-                val airQuality = getAirQualityUseCase(
-                    lat = weather.lat,
-                    lon = weather.lon
-                )
-
-                val now = System.currentTimeMillis() / 1000
-
-                _uiState.value = WeatherUiState.Success(
-                    weather = weather.toUi(),
+                val success = WeatherUiState.Success(
+                    weather        = weather.toUi(),
                     hourlyForecast = hourly.map { it.toUi() },
-                    dailyForecast = daily.map { it.toUi(now) },
-                    airQuality = airQuality.toUi()
+                    dailyForecast  = daily.map { it.toUi(now) },
+                    airQuality     = airQuality.toUi()
                 )
+                lastSuccessState = success
+                _uiState.value   = success
             } catch (e: Exception) {
                 _uiState.value = mapError(e)
             }
@@ -115,26 +112,14 @@ class WeatherViewModel(
 
     /* ---------------- Error mapping ---------------- */
 
-    private fun mapError(e: Exception): WeatherUiState.Error =
-        when (e) {
-            is IOException ->
-                WeatherUiState.Error.Network()
-
-            is IllegalArgumentException ->
-                WeatherUiState.Error.CityNotFound()
-
-            else ->
-                WeatherUiState.Error.Generic()
-        }
+    private fun mapError(e: Exception): WeatherUiState.Error = when (e) {
+        is IOException              -> WeatherUiState.Error.Network()
+        is IllegalArgumentException -> WeatherUiState.Error.CityNotFound()
+        else                        -> WeatherUiState.Error.Generic()
+    }
 
     /* ---------------- Internal helpers ---------------- */
 
-    /**
-     * 🔒 Garantia absoluta:
-     * localização NUNCA passa por getWeather(city)
-     */
-    private suspend fun getWeatherByLocation(
-        lat: Double,
-        lon: Double
-    ) = getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
+    private suspend fun getWeatherByLocation(lat: Double, lon: Double) =
+        getWeatherUseCase.repository.getWeatherByLocation(lat, lon)
 }

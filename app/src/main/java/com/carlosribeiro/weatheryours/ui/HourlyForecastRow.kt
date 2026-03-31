@@ -1,92 +1,93 @@
 package com.carlosribeiro.weatheryours.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.HourlyForecastUiModel
+import com.carlosribeiro.weatheryours.ui.theme.AccentIce
+import com.carlosribeiro.weatheryours.ui.theme.GlassBorderSubtle
+import com.carlosribeiro.weatheryours.ui.theme.GlassSurface
+import com.carlosribeiro.weatheryours.ui.theme.GlassSurfaceStrong
+import com.carlosribeiro.weatheryours.ui.theme.TextPrimary
+import com.carlosribeiro.weatheryours.ui.theme.TextSecondary
 
-@Composable
-fun HourlyForecastItem(
-    uiModel: HourlyForecastUiModel
-) {
-    Column(
-        modifier = Modifier
-            .width(80.dp)
-            .height(96.dp)
-            .background(
-                color = Color.White.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = uiModel.hour,
-            color = Color.White,
-            fontSize = 12.sp
-        )
-
-        Text(
-            text = uiModel.temperatureText,
-            color = Color.White,
-            fontSize = 14.sp
-        )
-
-        Text(
-            text = uiModel.description,
-            color = Color.White.copy(alpha = 0.8f),
-            fontSize = 10.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            lineHeight = 12.sp
-        )
-    }
-}
-
+/**
+ * HourlyForecastRow
+ *
+ * Cards distribuídos com weight(1f) — preenchem toda a largura
+ * disponível independente do tamanho de tela, sem scroll horizontal.
+ * O primeiro item é destacado como "agora".
+ */
 @Composable
 fun HourlyForecastRow(
-    items: List<HourlyForecastUiModel>
+    items   : List<HourlyForecastUiModel>,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier              = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items.forEach { item ->
-            HourlyForecastItem(uiModel = item)
+        items.forEachIndexed { index, item ->
+            HourlyItem(
+                item     = item,
+                isNow    = index == 0,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
-/* -------------------- PREVIEW -------------------- */
-
 @Composable
-@androidx.compose.ui.tooling.preview.Preview(
-    showBackground = true,
-    backgroundColor = 0xFF1B4F72
-)
-fun HourlyForecastRowPreview() {
+private fun HourlyItem(
+    item    : HourlyForecastUiModel,
+    isNow   : Boolean,
+    modifier: Modifier = Modifier
+) {
+    val shape       = RoundedCornerShape(16.dp)
+    val bgColor     = if (isNow) GlassSurfaceStrong else GlassSurface
+    val borderColor = if (isNow) AccentIce.copy(alpha = 0.5f) else GlassBorderSubtle
 
-    val previewItems = listOf(
-        HourlyForecastUiModel("6 AM", "0°", "overcast clouds"),
-        HourlyForecastUiModel("9 AM", "8°", "scattered clouds"),
-        HourlyForecastUiModel("12 PM", "3°", "light rain"),
-        HourlyForecastUiModel("3 PM", "0°", "clear sky")
-    )
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(bgColor)
+            .border(1.dp, borderColor, shape)
+            .padding(vertical = 14.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text  = item.hour,
+            style = MaterialTheme.typography.bodySmall.copy(
+                color      = if (isNow) TextPrimary else TextSecondary,
+                fontWeight = if (isNow) FontWeight.SemiBold else FontWeight.Normal
+            )
+        )
 
-    HourlyForecastRow(items = previewItems)
+        WeatherIcon(
+            description = item.description,
+            size        = 26.dp
+        )
+
+        Text(
+            text  = item.temperatureText,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color      = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
 }

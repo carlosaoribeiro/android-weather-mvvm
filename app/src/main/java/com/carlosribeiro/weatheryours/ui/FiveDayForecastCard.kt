@@ -1,117 +1,119 @@
 package com.carlosribeiro.weatheryours.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.carlosribeiro.weatheryours.ui.model.DailyForecastUiModel
-import androidx.compose.ui.res.stringResource
-import com.carlosribeiro.weatheryours.R
+import com.carlosribeiro.weatheryours.ui.theme.DividerColor
+import com.carlosribeiro.weatheryours.ui.theme.GlassBorder
+import com.carlosribeiro.weatheryours.ui.theme.GlassSurface
+import com.carlosribeiro.weatheryours.ui.theme.TextPrimary
+import com.carlosribeiro.weatheryours.ui.theme.TextSecondary
+import com.carlosribeiro.weatheryours.ui.theme.TextTertiary
 
-
+/**
+ * FiveDayForecastCard
+ *
+ * DailyForecastUiModel: day, icon (string), minTemp, maxTemp
+ */
 @Composable
 fun FiveDayForecastCard(
-    items: List<DailyForecastUiModel>
+    items   : List<DailyForecastUiModel>,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2E3A67)
-        )
+    val shape = RoundedCornerShape(20.dp)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(GlassSurface)
+            .border(1.dp, GlassBorder, shape)
+            .padding(vertical = 8.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            // HEADER
-            Text(
-                text = stringResource(R.string.five_day_forecast),
-                color = Color.White.copy(alpha = 0.7f),
-                style = MaterialTheme.typography.labelMedium
-            )
-            // 🔹 DIVIDER
-            Divider(
-                color = Color.White.copy(alpha = 0.15f),
-                thickness = 1.dp
-            )
-
-            // ROWS
-            items.forEachIndexed { index, day ->
-                ForecastRow(day)
-
-                if (index < items.lastIndex) {
-                    Divider(
-                        color = Color.White.copy(alpha = 0.08f),
-                        thickness = 0.5.dp
-                    )
-                }
+        items.forEachIndexed { index, item ->
+            DailyRow(item = item)
+            if (index < items.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(1.dp)
+                        .background(DividerColor)
+                )
             }
         }
     }
 }
 
-
 @Composable
-private fun ForecastRow(model: DailyForecastUiModel) {
+private fun DailyRow(
+    item    : DailyForecastUiModel,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = Modifier
+        modifier          = modifier
             .fillMaxWidth()
-            .height(36.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        // Day
+        // Dia (ex: "Amanhã", "Sáb")
         Text(
-            text = model.day,
-            color = Color.White,
-            modifier = Modifier.width(56.dp)
+            text     = item.day,
+            style    = MaterialTheme.typography.bodyMedium.copy(
+                color      = TextPrimary,
+                fontWeight = FontWeight.Medium
+            ),
+            modifier = Modifier.weight(1.2f)
         )
 
-        // Icon (placeholder)
-        Text(
-            text = "☀️",
-            modifier = Modifier.width(32.dp)
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // MIN
-        Column(
-            horizontalAlignment = Alignment.End
+        // Ícone + descrição do campo icon (ex: "sunny", "cloudy")
+        Row(
+            modifier          = Modifier.weight(2f),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "MIN",
-                fontSize = 10.sp,
-                color = Color.White.copy(alpha = 0.6f)
+            WeatherIcon(
+                description = item.icon,
+                size        = 22.dp
             )
+            Spacer(Modifier.width(8.dp))
             Text(
-                text = model.minTemp,
-                color = Color.White.copy(alpha = 0.75f)
+                text  = item.icon.replaceFirstChar { it.uppercase() },
+                style = MaterialTheme.typography.bodyMedium.copy(color = TextSecondary)
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        // Máxima
+        Text(
+            text     = item.maxTemp,
+            style    = MaterialTheme.typography.bodyMedium.copy(
+                color      = TextPrimary,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier.weight(0.8f)
+        )
 
-        // MAX
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(
-                text = "MAX",
-                fontSize = 10.sp,
-                color = Color.White.copy(alpha = 0.6f)
-            )
-            Text(
-                text = model.maxTemp,
-                color = Color.White
-            )
-        }
+        // Mínima
+        Text(
+            text     = item.minTemp,
+            style    = MaterialTheme.typography.bodyMedium.copy(color = TextTertiary),
+            modifier = Modifier.weight(0.8f)
+        )
     }
 }
